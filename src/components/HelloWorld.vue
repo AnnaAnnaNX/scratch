@@ -1,8 +1,20 @@
 <template>
-  <div>
-    <canvas class="zdog-canvas" width="240" height="240"></canvas>
-    <input type='button' value="add circle" @click="add" />
-  </div>
+  <v-row>
+    <v-col
+      cols="12"
+      sm="12"
+      md="9"
+    >
+      <canvas class="zdog-canvas" style="width: 100%; height: 300px;"></canvas>
+    </v-col>
+    <v-col
+      cols="12"
+      sm="12"
+      md="3"
+    >
+      <v-btn type='button' value="add circle" @click="add">Add scratch</v-btn>
+    </v-col>
+  </v-row>
 </template>
 
 <script>
