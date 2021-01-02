@@ -5,7 +5,7 @@
       sm="12"
       md="9"
     >
-      <canvas class="zdog-canvas" style="width: 100%; height: 300px;"></canvas>
+      <svg class="zdog-canvas"  width="500" height="500" style="border: 1px solid;"></svg>
     </v-col>
     <v-col
       cols="12"
