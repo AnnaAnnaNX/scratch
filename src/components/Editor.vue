@@ -5,7 +5,8 @@
       sm="12"
       md="9"
     >
-      <svg class="zdog-canvas"  width="500" height="500" style="border: 1px solid;"></svg>
+      <svg class="zdog-svg"  width="500" height="500" style="border: 1px solid;"></svg>
+      <canvas class="zdog-canvas"  width="500" height="500" style="border: 1px solid;"></canvas>
     </v-col>
     <v-col
       cols="12"
@@ -41,6 +42,11 @@
           :disabled="selectedScratch === null"
         >Relocate scratch</v-btn>
       </div>
+      <div>
+        <v-btn
+          @click="save"
+        >Save scratch</v-btn>
+      </div>
     </v-col>
   </v-row>
 </template>
@@ -50,7 +56,7 @@ import Zdog from 'zdog'
 import { createInitShape } from '../utils.js'
 
 export default {
-  name: 'HelloWorld',
+  name: 'Editor',
   props: {
     msg: String
   },
@@ -110,13 +116,30 @@ export default {
 
       this.illo.updateRenderGraph();
     },
+    save() {
+      console.log('save');
+      const svg = document.getElementsByClassName('zdog-svg')[0].outerHTML;
+      console.log(svg);
+
+      const illo = new Zdog.Illustration({
+        element: '.zdog-canvas',
+      });
+      
+      for(const stratch of this.scratches) {
+        stratch.copyGraph({
+          addTo: illo,
+        });
+      }    
+      
+      illo.updateRenderGraph();
+    },
   },
   mounted() {
     createInitShape();
     // create illo
     this.illo = new Zdog.Illustration({
       // set canvas with selector
-      element: '.zdog-canvas',
+      element: '.zdog-svg',
     });
 
     const group = new Zdog.Group({
