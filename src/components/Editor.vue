@@ -5,8 +5,10 @@
       sm="12"
       md="9"
     >
-      <svg class="zdog-svg"  width="500" height="500" style="border: 1px solid;"></svg>
-      <canvas class="zdog-canvas"  width="500" height="500" style="border: 1px solid;"></canvas>
+      <svg id="zdog-svg"  width="500" height="500" style="border: 1px solid;"></svg>
+      <div style="display: none;">
+        <canvas id="zdog-canvas"  width="500" height="500" style="border: 1px solid;"></canvas>
+      </div>
     </v-col>
     <v-col
       cols="12"
@@ -44,8 +46,13 @@
       </div>
       <div>
         <v-btn
-          @click="save"
-        >Save scratch</v-btn>
+          @click="saveAsPng"
+        >Save scratch as png</v-btn>
+        <v-btn
+          @click="saveAsSvg"
+        >Save scratch as svg</v-btn>
+        <a id="loadAsPng" href="#" download="picture.png" style="visability: false;"></a>
+        <a id="loadAsSvg" href="#" download="picture.svg" style="visability: false;"></a>
       </div>
     </v-col>
   </v-row>
@@ -80,7 +87,7 @@ export default {
   },
   watch: {
     selectedScratch(newValue) {
-      console.log('changed selectedScratch');
+      console.log('changed selectedScratch 👍');
       console.log(newValue);
       this.currentScratch = this.scratches[newValue];
       if (!this.currentScratch) {
@@ -116,15 +123,13 @@ export default {
 
       this.illo.updateRenderGraph();
     },
-    save() {
-      console.log('save');
-      const svg = document.getElementsByClassName('zdog-svg')[0].outerHTML;
-      console.log(svg);
+    saveAsPng() {
+      console.log('saveAsPng');
 
       const illo = new Zdog.Illustration({
-        element: '.zdog-canvas',
+        element: '#zdog-canvas',
       });
-      
+
       for(const stratch of this.scratches) {
         stratch.copyGraph({
           addTo: illo,
@@ -132,14 +137,28 @@ export default {
       }    
       
       illo.updateRenderGraph();
+
+      document.getElementById('loadAsPng').click();  
+
+
+
     },
+    saveAsSvg() {
+      console.log('saveAsSvg');
+      const svg = document.getElementById('zdog-svg').outerHTML;
+      console.log(svg);
+
+      document.getElementById('loadAsSvg').click();  
+
+    }
   },
   mounted() {
+
     createInitShape();
     // create illo
     this.illo = new Zdog.Illustration({
       // set canvas with selector
-      element: '.zdog-svg',
+      element: '#zdog-svg',
     });
 
     const group = new Zdog.Group({
@@ -165,6 +184,28 @@ export default {
 
     // update & render
     this.illo.updateRenderGraph();
+
+    document.getElementById('loadAsPng').addEventListener('click', function(e) {
+      console.log('click on #loadAsPng');
+
+      const dataURL = document.getElementById('zdog-canvas').toDataURL('image/png');
+      e.target.href = dataURL;
+
+    });
+
+    document.getElementById('loadAsSvg').addEventListener('click', function(e) {
+      console.log('click on #loadAsSvg');
+
+      const SVGDomElement = document.getElementById('zdog-svg');
+      const serializedSVG = new XMLSerializer().serializeToString(SVGDomElement);
+      const base64Data = window.btoa(serializedSVG);
+      const dataURL = `data:image/svg+xml;base64,${base64Data}`;
+
+      e.target.href = dataURL;
+
+    });
+
+
   }
 }
 </script>
