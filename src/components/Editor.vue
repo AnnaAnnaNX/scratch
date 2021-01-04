@@ -27,6 +27,7 @@
         {{ selectedScratch }}
       </div>
       <div>
+        <h3>Relocate</h3>
         <v-slider
           v-if="selectedScratch !== null"
           v-model="coord.x"
@@ -60,6 +61,41 @@
           thumb-label="always"
         ></v-slider>
 
+      </div>
+      <div>
+        <h3>Rotate</h3>
+        <v-slider
+          v-if="selectedScratch !== null"
+          v-model="angles.x"
+          class="align-center slider"
+          :max="180"
+          :min="-180"
+          hide-details
+          label="x"
+          thumb-label="always"
+        ></v-slider>
+        
+        <v-slider
+          v-if="selectedScratch !== null"
+          v-model="angles.y"
+          class="align-center slider"
+          :max="180"
+          :min="-180"
+          hide-details
+          label="y"
+          thumb-label="always"
+        ></v-slider>
+        
+        <v-slider
+          v-if="selectedScratch !== null"
+          v-model="angles.z"
+          class="align-center slider"
+          :max="180"
+          :min="-180"
+          hide-details
+          label="z"
+          thumb-label="always"
+        ></v-slider>
       </div>
       <div>
         <v-btn
@@ -96,6 +132,11 @@ export default {
         y: null,
         z: null,
       },
+      angles: {
+        x: null,
+        y: null,
+        z: null,
+      },
       mesh: null,
       MAX_COORD,
     }
@@ -125,12 +166,16 @@ export default {
        this.relocate(newValue);
      },
      deep: true
+    },
+    angles: {
+     handler(newValue){
+       this.rotate(newValue);
+     },
+     deep: true
     }
   },
   methods: {
     add() {
-      console.log('add circle');
-
       const group = new Zdog.Group({
         addTo: this.illo,
         translate: { z: 20 },
@@ -157,18 +202,20 @@ export default {
 
     },
     relocate({x, y, z}) {
-      console.log('relocate');
-
       if (this.currentScratch) {
-
         this.currentScratch.translate.x = Number.parseInt(x);
         this.currentScratch.translate.y = Number.parseInt(y);
         this.currentScratch.translate.z = Number.parseInt(z);
-
         this.illo.updateRenderGraph();
-
       }
-
+    },
+    rotate({x, y, z}) {
+      if (this.currentScratch) {
+        this.currentScratch.rotate.x = Zdog.TAU * parseFloat(x) / 360;
+        this.currentScratch.rotate.y = Zdog.TAU * parseFloat(y) / 360;
+        this.currentScratch.rotate.z = Zdog.TAU * parseFloat(z) / 360;
+        this.illo.updateRenderGraph();
+      }
     },
     saveAsPng() {
       console.log('saveAsPng');
