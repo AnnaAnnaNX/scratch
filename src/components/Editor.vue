@@ -20,29 +20,82 @@
       </div>
       <div>
         <v-select
-            :items="items"
-            v-model="selectedScratch"
-          ></v-select>
-          {{ selectedScratch }}
+          :items="items"
+          :value="selectedScratch"
+          @input="setSelectedScratch"
+        ></v-select>
+        {{ selectedScratch }}
       </div>
       <div>
-        <v-text-field
-          label="x"
+        <h3>Relocate</h3>
+        <v-slider
+          v-if="selectedScratch !== null"
           v-model="coord.x"
-        ></v-text-field>
-        <v-text-field
-          label="y"
+          class="align-center slider"
+          :max="MAX_COORD"
+          :min="-MAX_COORD"
+          hide-details
+          label="x"
+          thumb-label="always"
+        ></v-slider>
+        
+        <v-slider
+          v-if="selectedScratch !== null"
           v-model="coord.y"
-        ></v-text-field>
-        <v-text-field
-          label="z"
+          class="align-center slider"
+          :max="MAX_COORD"
+          :min="-MAX_COORD"
+          hide-details
+          label="y"
+          thumb-label="always"
+        ></v-slider>
+        
+        <v-slider
+          v-if="selectedScratch !== null"
           v-model="coord.z"
-        ></v-text-field>
-        <v-btn
-         type='button'
-          @click="relocate"
-          :disabled="selectedScratch === null"
-        >Relocate scratch</v-btn>
+          class="align-center slider"
+          :max="MAX_COORD"
+          :min="-MAX_COORD"
+          hide-details
+          label="z"
+          thumb-label="always"
+        ></v-slider>
+
+      </div>
+      <div>
+        <h3>Rotate</h3>
+        <v-slider
+          v-if="selectedScratch !== null"
+          v-model="angles.x"
+          class="align-center slider"
+          :max="180"
+          :min="-180"
+          hide-details
+          label="x"
+          thumb-label="always"
+        ></v-slider>
+        
+        <v-slider
+          v-if="selectedScratch !== null"
+          v-model="angles.y"
+          class="align-center slider"
+          :max="180"
+          :min="-180"
+          hide-details
+          label="y"
+          thumb-label="always"
+        ></v-slider>
+        
+        <v-slider
+          v-if="selectedScratch !== null"
+          v-model="angles.z"
+          class="align-center slider"
+          :max="180"
+          :min="-180"
+          hide-details
+          label="z"
+          thumb-label="always"
+        ></v-slider>
       </div>
       <div>
         <v-btn
@@ -60,7 +113,8 @@
 
 <script>
 import Zdog from 'zdog'
-import { createInitShape } from '../utils.js'
+import { createInitShape, createMesh } from '../utils.js'
+import { MAX_COORD } from '../constants.json'
 
 export default {
   name: 'Editor',
@@ -78,6 +132,13 @@ export default {
         y: null,
         z: null,
       },
+      angles: {
+        x: null,
+        y: null,
+        z: null,
+      },
+      mesh: null,
+      MAX_COORD,
     }
   },
   computed: {
@@ -100,28 +161,61 @@ export default {
       this.coord.y = this.currentScratch.translate.y;
       this.coord.z = this.currentScratch.translate.z;
     },
+    coord: {
+     handler(newValue){
+       this.relocate(newValue);
+     },
+     deep: true
+    },
+    angles: {
+     handler(newValue){
+       this.rotate(newValue);
+     },
+     deep: true
+    }
   },
   methods: {
     add() {
-      console.log('add circle');
-      const newCurrent = this.currentScratch.copyGraph({
-        // overwrite original options
-        translate: { x: this.currentScratch.translate.x + 30 },
-        color: '#C25',
+      const group = new Zdog.Group({
+        addTo: this.illo,
+        translate: { z: 20 },
       });
-      this.currentScratch = newCurrent;
+      // eye white first
+      new Zdog.Ellipse({
+        addTo: group,
+        width: 160,
+        height: 80,
+      });
+      // then iris
+      new Zdog.Ellipse({
+        addTo: group,
+        diameter: 70,
+      });
+
+      // add circle
+      this.currentScratch = group;
       this.scratches.push(this.currentScratch);
+      this.selectedScratch = this.scratches.length - 1;
+
       // update & render
       this.illo.updateRenderGraph();
+
     },
-    relocate() {
-      console.log('relocate');
-
-      this.currentScratch.translate.x = this.coord.x;
-      this.currentScratch.translate.y = this.coord.y;
-      this.currentScratch.translate.z = this.coord.z;
-
-      this.illo.updateRenderGraph();
+    relocate({x, y, z}) {
+      if (this.currentScratch) {
+        this.currentScratch.translate.x = Number.parseInt(x);
+        this.currentScratch.translate.y = Number.parseInt(y);
+        this.currentScratch.translate.z = Number.parseInt(z);
+        this.illo.updateRenderGraph();
+      }
+    },
+    rotate({x, y, z}) {
+      if (this.currentScratch) {
+        this.currentScratch.rotate.x = Zdog.TAU * parseFloat(x) / 360;
+        this.currentScratch.rotate.y = Zdog.TAU * parseFloat(y) / 360;
+        this.currentScratch.rotate.z = Zdog.TAU * parseFloat(z) / 360;
+        this.illo.updateRenderGraph();
+      }
     },
     saveAsPng() {
       console.log('saveAsPng');
@@ -150,7 +244,12 @@ export default {
 
       document.getElementById('loadAsSvg').click();  
 
-    }
+    },
+
+    setSelectedScratch(val) {
+      this.selectedScratch = val;
+    },
+
   },
   mounted() {
 
@@ -161,26 +260,7 @@ export default {
       element: '#zdog-svg',
     });
 
-    const group = new Zdog.Group({
-      addTo: this.illo,
-      translate: { z: 20 },
-    });
-    // eye white first
-    new Zdog.Ellipse({
-      addTo: group,
-      width: 160,
-      height: 80,
-    });
-    // then iris
-    new Zdog.Ellipse({
-      addTo: group,
-      diameter: 70,
-    });
-
-    // add circle
-    this.currentScratch = group;
-
-    this.scratches.push(this.currentScratch);
+    this.mesh = createMesh(this.illo);
 
     // update & render
     this.illo.updateRenderGraph();
@@ -225,5 +305,8 @@ li {
 }
 a {
   color: #42b983;
+}
+.slider {
+  margin-top: 25px;
 }
 </style>
