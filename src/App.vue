@@ -25,6 +25,19 @@
         />
       </div>
 
+      <router-link
+        to="/"
+        class="link ma-8"
+      >
+        Editor
+      </router-link>
+      <router-link
+        to="/about"
+        class="link ma-8"
+      >
+        About
+      </router-link>
+
       <v-spacer></v-spacer>
 
       <v-btn
@@ -38,19 +51,17 @@
     </v-app-bar>
 
     <v-main>
-      <HelloWorld/>
+      <router-view></router-view>
     </v-main>
   </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld';
 
 export default {
   name: 'App',
 
   components: {
-    HelloWorld,
   },
 
   data: () => ({
@@ -58,3 +69,16 @@ export default {
   }),
 };
 </script>
+
+<style scoped>
+.link {
+  color: #fff;
+  text-transform: uppercase;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+}
+.link:hover {
+  text-decoration: underline;
+}
+</style>
