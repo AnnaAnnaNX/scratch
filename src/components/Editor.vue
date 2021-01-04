@@ -60,7 +60,7 @@
 
 <script>
 import Zdog from 'zdog'
-import { createInitShape } from '../utils.js'
+import { createInitShape, createMesh } from '../utils.js'
 
 export default {
   name: 'Editor',
@@ -78,6 +78,7 @@ export default {
         y: null,
         z: null,
       },
+      mesh: null,
     }
   },
   computed: {
@@ -100,6 +101,13 @@ export default {
       this.coord.y = this.currentScratch.translate.y;
       this.coord.z = this.currentScratch.translate.z;
     },
+    coord: {
+     handler(newValue){
+       console.log('coord');
+      this.relocate(newValue);
+     },
+     deep: true
+    }
   },
   methods: {
     add() {
@@ -114,14 +122,19 @@ export default {
       // update & render
       this.illo.updateRenderGraph();
     },
-    relocate() {
+    relocate({x, y, z}) {
       console.log('relocate');
 
-      this.currentScratch.translate.x = this.coord.x;
-      this.currentScratch.translate.y = this.coord.y;
-      this.currentScratch.translate.z = this.coord.z;
+      if (this.currentScratch) {
 
-      this.illo.updateRenderGraph();
+        this.currentScratch.translate.x = Number.parseInt(x);
+        this.currentScratch.translate.y = Number.parseInt(y);
+        this.currentScratch.translate.z = Number.parseInt(z);
+
+        this.illo.updateRenderGraph();
+
+      }
+
     },
     saveAsPng() {
       console.log('saveAsPng');
@@ -160,6 +173,8 @@ export default {
       // set canvas with selector
       element: '#zdog-svg',
     });
+
+    this.mesh = createMesh(this.illo);
 
     const group = new Zdog.Group({
       addTo: this.illo,
