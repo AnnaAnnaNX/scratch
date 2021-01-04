@@ -24,7 +24,6 @@
           :value="selectedScratch"
           @input="setSelectedScratch"
         ></v-select>
-        {{ selectedScratch }}
       </div>
       <div>
         <h3>Relocate</h3>
@@ -113,7 +112,7 @@
 
 <script>
 import Zdog from 'zdog'
-import { createInitShape, createMesh } from '../utils.js'
+import { createInitShape, createMesh, createItem } from '../utils.js'
 import { MAX_COORD } from '../constants.json'
 
 export default {
@@ -176,21 +175,7 @@ export default {
   },
   methods: {
     add() {
-      const group = new Zdog.Group({
-        addTo: this.illo,
-        translate: { z: 20 },
-      });
-      // eye white first
-      new Zdog.Ellipse({
-        addTo: group,
-        width: 160,
-        height: 80,
-      });
-      // then iris
-      new Zdog.Ellipse({
-        addTo: group,
-        diameter: 70,
-      });
+      const group = createItem(this.illo);
 
       // add circle
       this.currentScratch = group;
@@ -233,8 +218,6 @@ export default {
       illo.updateRenderGraph();
 
       document.getElementById('loadAsPng').click();  
-
-
 
     },
     saveAsSvg() {

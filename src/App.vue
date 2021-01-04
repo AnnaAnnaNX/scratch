@@ -50,7 +50,7 @@
       </v-btn>
     </v-app-bar>
 
-    <v-main>
+    <v-main class="ma-10">
       <router-view></router-view>
     </v-main>
   </v-app>
