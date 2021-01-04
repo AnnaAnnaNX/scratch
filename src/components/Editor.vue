@@ -20,29 +20,46 @@
       </div>
       <div>
         <v-select
-            :items="items"
-            v-model="selectedScratch"
-          ></v-select>
-          {{ selectedScratch }}
+          :items="items"
+          :value="selectedScratch"
+          @input="setSelectedScratch"
+        ></v-select>
+        {{ selectedScratch }}
       </div>
       <div>
-        <v-text-field
-          label="x"
+        <v-slider
+          v-if="selectedScratch !== null"
           v-model="coord.x"
-        ></v-text-field>
-        <v-text-field
-          label="y"
+          class="align-center slider"
+          :max="MAX_COORD"
+          :min="-MAX_COORD"
+          hide-details
+          label="x"
+          thumb-label="always"
+        ></v-slider>
+        
+        <v-slider
+          v-if="selectedScratch !== null"
           v-model="coord.y"
-        ></v-text-field>
-        <v-text-field
-          label="z"
+          class="align-center slider"
+          :max="MAX_COORD"
+          :min="-MAX_COORD"
+          hide-details
+          label="y"
+          thumb-label="always"
+        ></v-slider>
+        
+        <v-slider
+          v-if="selectedScratch !== null"
           v-model="coord.z"
-        ></v-text-field>
-        <v-btn
-         type='button'
-          @click="relocate"
-          :disabled="selectedScratch === null"
-        >Relocate scratch</v-btn>
+          class="align-center slider"
+          :max="MAX_COORD"
+          :min="-MAX_COORD"
+          hide-details
+          label="z"
+          thumb-label="always"
+        ></v-slider>
+
       </div>
       <div>
         <v-btn
@@ -61,6 +78,7 @@
 <script>
 import Zdog from 'zdog'
 import { createInitShape, createMesh } from '../utils.js'
+import { MAX_COORD } from '../constants.json'
 
 export default {
   name: 'Editor',
@@ -79,6 +97,7 @@ export default {
         z: null,
       },
       mesh: null,
+      MAX_COORD,
     }
   },
   computed: {
@@ -103,8 +122,7 @@ export default {
     },
     coord: {
      handler(newValue){
-       console.log('coord');
-      this.relocate(newValue);
+       this.relocate(newValue);
      },
      deep: true
     }
@@ -112,15 +130,31 @@ export default {
   methods: {
     add() {
       console.log('add circle');
-      const newCurrent = this.currentScratch.copyGraph({
-        // overwrite original options
-        translate: { x: this.currentScratch.translate.x + 30 },
-        color: '#C25',
+
+      const group = new Zdog.Group({
+        addTo: this.illo,
+        translate: { z: 20 },
       });
-      this.currentScratch = newCurrent;
+      // eye white first
+      new Zdog.Ellipse({
+        addTo: group,
+        width: 160,
+        height: 80,
+      });
+      // then iris
+      new Zdog.Ellipse({
+        addTo: group,
+        diameter: 70,
+      });
+
+      // add circle
+      this.currentScratch = group;
       this.scratches.push(this.currentScratch);
+      this.selectedScratch = this.scratches.length - 1;
+
       // update & render
       this.illo.updateRenderGraph();
+
     },
     relocate({x, y, z}) {
       console.log('relocate');
@@ -163,7 +197,12 @@ export default {
 
       document.getElementById('loadAsSvg').click();  
 
-    }
+    },
+
+    setSelectedScratch(val) {
+      this.selectedScratch = val;
+    },
+
   },
   mounted() {
 
@@ -175,27 +214,6 @@ export default {
     });
 
     this.mesh = createMesh(this.illo);
-
-    const group = new Zdog.Group({
-      addTo: this.illo,
-      translate: { z: 20 },
-    });
-    // eye white first
-    new Zdog.Ellipse({
-      addTo: group,
-      width: 160,
-      height: 80,
-    });
-    // then iris
-    new Zdog.Ellipse({
-      addTo: group,
-      diameter: 70,
-    });
-
-    // add circle
-    this.currentScratch = group;
-
-    this.scratches.push(this.currentScratch);
 
     // update & render
     this.illo.updateRenderGraph();
@@ -240,5 +258,8 @@ li {
 }
 a {
   color: #42b983;
+}
+.slider {
+  margin-top: 25px;
 }
 </style>
